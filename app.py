@@ -55,3 +55,31 @@ def verify_token(token):
 
 
 @app.route('/checkout', methods=['POST'])
+def checkout():
+    # check if token is provided in the header
+    token = request.headers.get('Authorization')
+    if not token or not token.startswith('Bearer '):
+        raise BadRequest(
+            description="Authorization token is missing or invalid.")
+
+    token = token.split(' ')[1]  # extract token from "Bearer <token>"
+    try:
+        # Verify the token
+        payload = verify_token(token)
+    except BadRequest as e:
+        return jsonify({"error": str(e)}), 401
+
+    order = request.json
+    if not order:
+        return jsonify({"error": "No order data provided"}), 400
+
+    # Check if the order exceeds the maximum allowed quantity
+    apply_special_offer = payload.get('apply_special_offer', False)
+
+    # Process the special offer
+    total_price = process_special_offer(order, apply_special_offer)
+    return jsonify({"total_price": total_price})
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
