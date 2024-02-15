@@ -9,7 +9,7 @@ payload = {
 }
 
 # Define a secret key to sign the token
-secret_key = 'ItIsWhatItIs'
+secret_key = '123456'
 
 # Generate the token
 token = jwt.encode(payload, secret_key, algorithm='HS256')

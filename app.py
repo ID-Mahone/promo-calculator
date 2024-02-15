@@ -18,9 +18,9 @@ special_offer_items = {"Crusty Chicken", "New Yorker"}
 
 # PostgreSQL connection
 postgres_connection = psycopg2.connect(
-    dbname="david",
-    user="david",
-    password="your_password",
+    dbname="promo",
+    user="wolt",
+    password="123456",
     host="localhost"
 )
 postgres_cursor = postgres_connection.cursor()
@@ -58,7 +58,7 @@ def verify_token(token):
 def checkout():
     # check if token is provided in the header
     token = request.headers.get('Authorization')
-    if not token or not token.startswith('Bearer '):
+    if not token or not token.startswith('Bearer <123456> '):
         raise BadRequest(
             description="Authorization token is missing or invalid.")
 
