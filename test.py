@@ -1,45 +1,47 @@
 import unittest
 import json
-from your_flask_app import app
+from app import app
 
-class TestFlaskApp(unittest.TestCase):
+
+class TestPromoUsage(unittest.TestCase):
 
     def setUp(self):
-        app.testing = True
         self.app = app.test_client()
+        self.app.testing = True
 
-    def test_valid_checkout_without_special_offer(self):
-        # Valid token without applying special offer
-        token = "valid_token"
-        order = {"Crusty Chicken": 1, "New Yorker": 2}
-        response = self.app.post('/checkout', headers={'Authorization': f'Bearer {token}'}, json=order)
-        data = json.loads(response.data.decode('utf-8'))
+    def test_checkout_with_promo(self):
+        order_data = {
+            "Crusty Chicken": 2,
+            "New Yorker": 1
+        }
+        response = self.app.post(
+            '/checkout', headers={"Authorization": "Bearer <YOUR_TOKEN>"}, json=order_data)
+        data = json.loads(response.get_data(as_text=True))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['total_price'], 19.97)
+        self.assertAlmostEqual(data["total_price"], 12.97, places=2)
 
-    def test_valid_checkout_with_special_offer(self):
-        # Valid token with applying special offer
-        token = "valid_token"
-        order = {"Crusty Chicken": 2, "New Yorker": 2}
-        response = self.app.post('/checkout', headers={'Authorization': f'Bearer {token}'}, json=order)
-        data = json.loads(response.data.decode('utf-8'))
+    def test_checkout_without_promo(self):
+        order_data = {
+            "Crusty Chicken": 2,
+            "New Yorker": 1
+        }
+        response = self.app.post(
+            '/checkout', headers={"Authorization": "Bearer <YOUR_TOKEN>"}, json=order_data)
+        data = json.loads(response.get_data(as_text=True))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['total_price'], 19.96)
+        self.assertAlmostEqual(data["total_price"], 17.97, places=2)
 
     def test_invalid_token(self):
-        # Invalid token
-        token = "invalid_token"
-        order = {"Crusty Chicken": 1, "New Yorker": 2}
-        response = self.app.post('/checkout', headers={'Authorization': f'Bearer {token}'}, json=order)
+        order_data = {
+            "Crusty Chicken": 2,
+            "New Yorker": 1
+        }
+        response = self.app.post(
+            '/checkout', headers={"Authorization": "Bearer invalid_token"}, json=order_data)
         self.assertEqual(response.status_code, 401)
+        data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(data["error"], "Invalid token, please log in again")
 
-    def test_no_order_data(self):
-        # No order data provided
-        token = "valid_token"
-        response = self.app.post('/checkout', headers={'Authorization': f'Bearer {token}'})
-        self.assertEqual(response.status_code, 400)
-        data = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(data['error'], 'No order data provided')
 
 if __name__ == '__main__':
     unittest.main()

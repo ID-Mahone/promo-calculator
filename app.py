@@ -18,8 +18,8 @@ special_offer_items = {"Crusty Chicken", "New Yorker"}
 
 # PostgreSQL connection
 postgres_connection = psycopg2.connect(
-    dbname="your_db_name",
-    user="your_username",
+    dbname="david",
+    user="david",
     password="your_password",
     host="localhost"
 )
